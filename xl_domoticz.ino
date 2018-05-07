@@ -34,7 +34,7 @@ void sendDomoticz(String url){
   Serial.println(domoticz_hostname);
   Serial.print("Requesting URL: ");
   Serial.println(url);
-#endif DEBUG
+#endif //DEBUG
   http.begin(domoticz_hostname, domoticz_port, url);
   int httpCode = http.GET();
     if (httpCode) {
@@ -43,7 +43,7 @@ void sendDomoticz(String url){
 #ifdef DEBUG
         Serial.println("Domoticz response "); 
         Serial.println(payload);
-#endif DEBUG
+#endif //DEBUG
       }
     }
   http.end();

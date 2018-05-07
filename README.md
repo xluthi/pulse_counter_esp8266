@@ -16,6 +16,6 @@ Digital input D1 is set to ground thanks to a pull down resistor R2.  When the r
 
 ## Compilation ##
 
-Before compiling, create a `private.h` file based on the provided `private_exemple.h` file: it should contain your Wifi settings, as well as the Domoticz parameters.  The `domoticz_counter_idx` parameter refers to the ID of the "incremental counter" created in Domoticz.
+Before compiling, create a `private.h` file based on the provided `private_example.h` file: it should contain your Wifi settings, as well as the Domoticz parameters.  The `domoticz_counter_idx` parameter refers to the ID of the "incremental counter" created in Domoticz.
 
 The code contains a lot of debug statements. If those are not required, comment the `#define DEBUG` at the beginning of the main file.
