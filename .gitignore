@@ -1,0 +1,18 @@
+# Specific for secret configuration parameters
+private.h
+
+*.log
+
+# backup, and autosave
+*~
+*.swp
+*.bak
+
+# Mac finder files and hidden folders
+.DS_Store
+#seems used to store extended file information: icon, time machine status...
+._*
+
+# Secific for some...
+Zone.sav
+
