@@ -27,7 +27,7 @@ void connectWifi(const char* ssid, const char* password, const char* hostname) {
   }
   Serial.println("");
   Serial.println("WiFi connected");
-  
+  sprintf(my_hostname, "ESP-%06X", ESP.getChipId());
   Serial.println(getWifiInfo());
 }
 

@@ -11,10 +11,21 @@
  *
  * See LICENSE.txt for the full license text.
  */
+
+#ifndef _PRIVATE_H_
+#define _PRIVATE_H_
+
 const char* wifi_ssid     = "SSID";
 const char* wifi_password = "PaSsWoRd";
 const char* wifi_hostname = "ESP8266_xyz";
 
-const char* domoticz_hostname    = "192.168.1.7";
+// Domoticz configuration
+const char* domoticz_hostname    = "192.168.2.10";
 const int   domoticz_port        = 6060;
 const int   domoticz_counter_idx = 3;
+
+// MQTT broker configuration
+#define MQTT_PORT 1883
+IPAddress mqtt_server_ip(192, 168, 2, 10);
+
+#endif
