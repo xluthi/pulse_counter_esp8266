@@ -48,6 +48,8 @@ void setup() {
   delay(10);
 #endif
   // Setup pins
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, HIGH);
   pinMode(reedLedPin, OUTPUT);
   pinMode(reedPin,   INPUT);
 
@@ -116,7 +118,5 @@ void debounceInterrupt() {
 void timer0_ISR (void) {
   timerDebounce++;
   timer0_write(ESP.getCycleCount() + delay_timer0);
-
-  DEBUG_PRINTLN("timer0_ISR");
 }
 

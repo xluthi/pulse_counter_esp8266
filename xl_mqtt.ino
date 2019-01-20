@@ -19,11 +19,17 @@
 // MQTT library
 #include <PubSubClient.h>
 #include "private.h"
+// The value sent via MQTT is in liter, the SCALE_FACTOR convert each pulse in liter:
+// value = SCALE_FACTOR * pulse
+// 0.5 == one pulse per 1/2 liter
+#define SCALE_FACTOR 0.5
 
 // to be called within setup()
 void setup_mqtt() {
   mqtt_client.setServer(mqtt_server_ip, MQTT_PORT);
   mqtt_client.setCallback(mqtt_callback);
+  mqtt_reconnect();
+  mqtt_send_boot_notification();
 }
 
 // to be called within loop()
@@ -36,6 +42,7 @@ void loop_mqtt() {
   mqtt_client.loop();
 }
 
+// Generic MQTT callback function.
 void mqtt_callback(char* topic, byte* payload, unsigned int length) {
   Serial.printf("Message [%s] ", topic);
   for (unsigned int i = 0; i < length; i++) {
@@ -43,11 +50,21 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
   }
   Serial.println();
 
+  String s_topic(topic);
+
+  if (s_topic == String("house/hardware/") + String(my_hostname) + String("/do_reboot")) {
+    Serial.printf("!! Reboot command catched (%s): rebooting...", topic);
+    ESP.restart();
+  }
+
   // test MQTT message
-  if ((char)payload[0] == '1') {
-    digitalWrite(LED_BUILTIN, LOW);
-  } else {
-    digitalWrite(LED_BUILTIN, HIGH);
+  if (s_topic == String("ctrl_led")) {
+  Serial.printf("ctrl_led message received, value: %c \n", (char)payload[0]);
+    if ((char)payload[0] == '1') {
+      digitalWrite(LED_BUILTIN, LOW);
+    } else {
+      digitalWrite(LED_BUILTIN, HIGH);
+    }
   }
 }
 
@@ -59,17 +76,33 @@ void mqtt_reconnect() {
       continue;
     }
     Serial.println("Connection to MQTT broker done :-)");
+
+    char topic[64];
+    sprintf(topic, "house/hardware/%s/#", my_hostname);
+    Serial.printf("Subscribing to MQTT topic: %s", topic);
+    mqtt_client.subscribe(topic);
     mqtt_client.subscribe("ctrl_led");
   }
 }
 
-void mqtt_send_pulse(int value) {
-  //sample MQTT messages
-  char msg[16];
+// Generic function to send a message to MQTT broker
+boolean mqtt_send_message(const char *topic, const char *payload) {
+  Serial.printf("Sending message '%s' to topic '%s'\n", payload, topic);
+  return mqtt_client.publish(topic, payload);
+}
+
+boolean mqtt_send_boot_notification() {
   char topic[64];
-  sprintf(msg, "%hu", value);
-  sprintf(topic, "house/esp/%s/water/city", my_hostname);
-  Serial.printf("Sending message '%s' to topic '%s'\n", msg, topic);
-  mqtt_client.publish(topic, msg);
+  sprintf(topic, "house/hardware/%s/boot", my_hostname);
+  return mqtt_send_message(topic, "1");
+}
+
+boolean mqtt_send_pulse(int value) {
+  //sample MQTT messages
+  float volume = value * SCALE_FACTOR;
+  char msg[16];
+  const char *topic = "/house/sensors/water/city";
+  sprintf(msg, "%f", volume);
+  return mqtt_send_message(topic, msg);
 }
 
