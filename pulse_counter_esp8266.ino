@@ -41,6 +41,10 @@ volatile unsigned long lastDebounce = 0;
 
 char my_hostname[10]; // ESP hostname based on chipid
 
+// The value sent via MQTT is in liter, the SENSOR_SCALE_FACTOR convert each pulse in liter:
+// value = SENSOR_SCALE_FACTOR * pulse
+// 0.5 == one pulse per 1/2 liter
+#define SENSOR_SCALE_FACTOR 0.5
 
 void setup() {
 #ifdef DEBUG
@@ -84,6 +88,7 @@ void loop() {
 
 #ifdef MQTT
     mqtt_send_pulse(value);
+    mqtt_send_liter((float)value * SENSOR_SCALE_FACTOR);
 #endif
     digitalWrite(reedLedPin, HIGH);
     delay(2000);
@@ -119,4 +124,3 @@ void timer0_ISR (void) {
   timerDebounce++;
   timer0_write(ESP.getCycleCount() + delay_timer0);
 }
-

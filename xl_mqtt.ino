@@ -114,6 +114,17 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
       mqtt_send_log_message("OK, I'm turning on the builtin LED.");
     }
   }
+
+  // return some configuration and state information's
+  else if (s_topic == "get_config") {
+    char msg[100];
+    sprintf(msg, "I'm sending info to ''%s' topic.", mqtt_sensor_topic);
+    mqtt_send_log_message(msg);
+    sprintf(msg, "File %s compiled on %s %s.", __FILE__, __DATE__, __TIME__);
+    mqtt_send_log_message(msg);
+    sprintf(msg, "I'm connected to Wifi ''%s'.", wifi_ssid);
+    mqtt_send_log_message(msg);
+  }
 }
 
 void mqtt_reconnect() {
@@ -152,8 +163,19 @@ boolean mqtt_send_log_message(const char *message) {
 }
 
 boolean mqtt_send_pulse(int value) {
+  // Should be deprecated in favor of mqtt_send_liter
   char msg[16];
-  const char *topic = "/house/sensors/water/city";
-  sprintf(msg, "%d", value);
+  char topic[64];
+  sprintf(msg, "%hu", value);
+  sprintf(topic, "house/esp/%s/water/city", my_hostname);
+  Serial.printf("Sending message '%s' to topic '%s'\n", msg, topic);
   return mqtt_send_message(topic, msg);
+}
+
+boolean mqtt_send_liter (float value) {
+  // Send a value in liter.  This should be the best way to do it:
+  // converting sensor data to physical value (liter) and then send to db.
+  char msg[16];
+  sprintf(msg, "%.2f", value);
+  return mqtt_send_message(mqtt_sensor_topic, msg);
 }
