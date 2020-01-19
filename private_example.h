@@ -1,4 +1,4 @@
-/* 
+/*
  * (c) © 2018 Xavier Lüthi xavier@luthi.eu
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,5 +27,7 @@ const int   domoticz_counter_idx = 3;
 // MQTT broker configuration
 #define MQTT_PORT 1883
 IPAddress mqtt_server_ip(192, 168, 2, 10);
+// The MQTT topic where to send the sensor value
+const char* mqtt_sensor_topic = "/house/sensors/water/city";
 
 #endif

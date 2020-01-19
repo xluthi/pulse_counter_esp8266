@@ -23,6 +23,10 @@
 
 #define MQTT_ROOT "house/hardware"
 #define MQTT_SENSOR_ROOT "house/sensors/"
+// Specific topic that all hardware on the network must listen to and answer.
+// It's a kind of discovery topic to have a view on active hardware.
+#define MQTT_INVENTORY_TOPIC "house/hardware/ping_all"
+
 char mqtt_root[sizeof(MQTT_ROOT) + 1 + sizeof(my_hostname)];
 bool send_mqtt_logs = true; // set to false to avoid sending log message via MQTT (/log topic)
 
@@ -60,9 +64,18 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
   /*********
    * Perform action depending on received topic
    *********/
-
+  // send my identity (kind of inventory)
+  if (String(topic) == String(MQTT_INVENTORY_TOPIC)) {
+    delay(random(1000));
+    char msg[100];
+    sprintf(msg, "Nice to meet you, I'm %s, sending on topic %s.", my_hostname, MQTT_SENSOR_ROOT);
+    mqtt_send_log_message(msg);
+    char topic[60];
+    sprintf(topic, "%s/%s", MQTT_INVENTORY_TOPIC, "result");
+    mqtt_send_message(topic, my_hostname);
+  }
   // reboot the ESP
-  if (s_topic == "do_reboot") {
+  else if (s_topic == "do_reboot") {
     /* See https://github.com/esp8266/Arduino/issues/1722#issuecomment-192624783
     * ESP.restart() does not work after the first restart after serial flashing.
     * However it works after manual reboot by power of RST switch.
@@ -140,6 +153,7 @@ void mqtt_reconnect() {
     sprintf(topic, "%s/#", mqtt_root);
     Serial.printf("Subscribing to MQTT topic: %s", topic);
     mqtt_client.subscribe(topic);
+    mqtt_client.subscribe(MQTT_INVENTORY_TOPIC);
   }
 }
 
