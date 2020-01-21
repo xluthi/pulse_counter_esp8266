@@ -76,4 +76,11 @@ The device is reporting pulses (aka. water volume consumption in liter) on the t
 
 Before compiling, create a `private.h` file based on the provided `private_example.h` file: it should contain your Wifi settings, as well as the Domoticz parameters.  The `domoticz_counter_idx` parameter refers to the ID of the "incremental counter" created in Domoticz.
 
+You could choose if you want Domoticz and/or MQTT backend activated. To do so, (un)define the relevant constants at the beginning of the `pulse_counter_ESP8266.ino` file:
+
+```
+#define DOMOTICZ
+#define MQTT
+```
+
 The code contains a lot of debug statements. If those are not required, comment the `#define DEBUG` at the beginning of the main file.
