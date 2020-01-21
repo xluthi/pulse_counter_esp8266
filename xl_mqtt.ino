@@ -16,6 +16,7 @@
 
     MQTT basic setup, configuration and core functions
 */
+#ifdef MQTT
 // MQTT library
 #include <PubSubClient.h>
 #include <ESP8266httpUpdate.h>
@@ -193,3 +194,4 @@ boolean mqtt_send_liter (float value) {
   sprintf(msg, "%.2f", value);
   return mqtt_send_message(mqtt_sensor_topic, msg);
 }
+#endif
