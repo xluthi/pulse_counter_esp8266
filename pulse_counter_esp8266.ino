@@ -99,7 +99,7 @@ void loop() {
 
 
 // Reed switch interrupt with debounce
-void debounceInterrupt() {
+ICACHE_RAM_ATTR void debounceInterrupt() {
 
   DEBUG_PRINTLN("Int !!!");
   DEBUG_PRINTLN(timerDebounce);
