@@ -1,6 +1,6 @@
 # Pulse counter with ESP8266 #
 
-This simple sketch detects magnetic pulse thanks to a reed switch, and sends it immediately to a [Domoticz](http://domoticz.com/) instance AND an MQTT broker.
+This simple sketch detects magnetic pulse thanks to a reed switch, and sends it immediately to a [Domoticz](http://domoticz.com/) instance and/or an MQTT broker (it's configurable).
 
 It is used with a Kent V100 (PSM) water meter, which is heavily used in Belgium.  It generates one pulse per 0.5 liter.
 
@@ -12,6 +12,19 @@ The hardware schematic is quite simple:
 
 
 Digital input D1 is set to ground thanks to a pull down resistor R2.  When the reed switch is closed, the input is raised to VCC and an interrupt is detected.  The LED1 is flashing to provide a visual control when a pulse is detected.
+
+## Domoticz ##
+The sketch was initially foreseen for Domoticz.  However, I'm not using it anymore as I switched to MQTT/influxDB/Grafana.
+
+In order to have it working with Domoticz, it requires:
+
+- to configure the hostname & port of the Domoticz host in `private.h`,
+- to create a general/incremental counter in Domoticz and set its index in `private.h`
+- to set the scale factor in Domoticz, depending on the number of impulsion per liter.
+
+This should be enough to have a working counter in Domoticz!
+
+*Note: as I'm not actively using Domoticz anymore, this part of the code is not regularly tested and might not be updated with newer Domoticz releases...*
 
 ## MQTT ##
 Initially, the sketch was foreseen to Domoticz only.  But MQTT has been added in order to use Grafana & InfluxDB as database and visualization tool, allowing greater flexibility in the aggregation and custom made dashboards.
