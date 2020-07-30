@@ -1,4 +1,4 @@
-/* 
+/*
  * (c) © 2018 Xavier Lüthi xavier@luthi.eu
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,25 +19,28 @@ void connectWifi(const char* ssid, const char* password, const char* hostname) {
   Serial.println(ssid);
 
   WiFi.hostname(hostname);
+  /* Explicitly set the ESP8266 to be a WiFi-client, otherwise, it by default,
+     would try to act as both a client and an access-point and could cause
+     network-issues with your other WiFi-devices on your WiFi-network. */
+  WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
- 
+
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
   }
   Serial.println("");
   Serial.println("WiFi connected");
-  sprintf(my_hostname, "ESP-%06X", ESP.getChipId());
   Serial.println(getWifiInfo());
 }
 
 
 String getWifiInfo() {
   String res = "Wifi information : { ";
-  
+
   res += "channel: ";
   res += WiFi.channel();
-  
+
   res += ", physical mode: ";
   switch (WiFi.getPhyMode()) {
     case WIFI_PHY_MODE_11B:
@@ -50,7 +53,7 @@ String getWifiInfo() {
       res += "11n";
       break;
   }
-  
+
   res += ", mode: ";
   switch (WiFi.getMode()) {
     case WIFI_OFF:
@@ -65,11 +68,13 @@ String getWifiInfo() {
     case WIFI_AP_STA:
       res += "access point & station";
       break;
+    default:
+      res += "strange mode";
   }
 
   res += ", RSSI: ";
   res += WiFi.RSSI();
-  
+
   res += ", localIp: ";
   res += WiFi.localIP().toString();
   res += ", subnet_mask: ";
@@ -82,5 +87,4 @@ String getWifiInfo() {
   res += WiFi.hostname();
   res += "}";
   return res;
-} 
-
+}

@@ -13,17 +13,11 @@
 */
 #include <ESP8266WiFi.h>
 #include "private.h"
+#include "MqttBackendWater.h"
 
-#define DOMOTICZ  // unset to not send values to domoticz
-#define MQTT // unset to not send values to the MQTT broker
 #define DEBUG
 #include "xl_debug.h"
 
-#ifdef MQTT
-  #include <PubSubClient.h>
-  WiFiClient wifi_client;
-  PubSubClient mqtt_client(wifi_client);
-#endif
 
 // PIN definition
 #define reedLedPin D2
@@ -39,12 +33,14 @@ volatile byte ledState = LOW;
 volatile unsigned long timerDebounce = 0;
 volatile unsigned long lastDebounce = 0;
 
-char my_hostname[10]; // ESP hostname based on chipid
-
 // The value sent via MQTT is in liter, the SENSOR_SCALE_FACTOR convert each pulse in liter:
 // value = SENSOR_SCALE_FACTOR * pulse
 // 0.5 == one pulse per 1/2 liter
 #define SENSOR_SCALE_FACTOR 0.5
+
+
+WiFiClient espClient;
+MqttBackendWater mqttClient(espClient);
 
 void setup() {
 #ifdef DEBUG
@@ -58,6 +54,7 @@ void setup() {
   pinMode(reedPin,   INPUT);
 
   connectWifi(wifi_ssid, wifi_password, wifi_hostname);
+  mqttClient.setup(MQTT_SERVER_IP, MQTT_SERVER_PORT);
 
   // configure "master" timer to 1 second.
   noInterrupts();
@@ -68,28 +65,17 @@ void setup() {
 
   // Interrupt for reed switch when the Pin goes from LOW to HIGH
   attachInterrupt(digitalPinToInterrupt(reedPin), debounceInterrupt, RISING);
-#ifdef MQTT
-  setup_mqtt();
-#endif
 }
 
 void loop() {
-#ifdef MQTT
-  loop_mqtt();
-#endif
+  mqttClient.reconnect();
+  mqttClient.loop();
   // Turn on LED when actuel pulse is detected.
   // The ledState is controlled in interrupt functions.
   if (ledState == HIGH) {
     int value = pulses;
     pulses = 0;
-#ifdef DOMOTICZ
-    sendPulseToDomoticz(value);
-#endif
-
-#ifdef MQTT
-    mqtt_send_pulse(value);
-    mqtt_send_liter((float)value * SENSOR_SCALE_FACTOR);
-#endif
+    mqttClient.sendLiter((float)value * SENSOR_SCALE_FACTOR);
     digitalWrite(reedLedPin, HIGH);
     delay(2000);
     digitalWrite(reedLedPin, LOW);

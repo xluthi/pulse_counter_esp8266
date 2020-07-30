@@ -13,21 +13,8 @@ The hardware schematic is quite simple:
 
 Digital input D1 is set to ground thanks to a pull down resistor R2.  When the reed switch is closed, the input is raised to VCC and an interrupt is detected.  The LED1 is flashing to provide a visual control when a pulse is detected.
 
-## Domoticz ##
-The sketch was initially foreseen for Domoticz.  However, I'm not using it anymore as I switched to MQTT/influxDB/Grafana.
-
-In order to have it working with Domoticz, it requires:
-
-- to configure the hostname & port of the Domoticz host in `private.h`,
-- to create a general/incremental counter in Domoticz and set its index in `private.h`
-- to set the scale factor in Domoticz, depending on the number of impulsion per liter.
-
-This should be enough to have a working counter in Domoticz!
-
-*Note: as I'm not actively using Domoticz anymore, this part of the code is not regularly tested and might not be updated with newer Domoticz releases...*
-
 ## MQTT ##
-Initially, the sketch was foreseen to Domoticz only.  But MQTT has been added in order to use Grafana & InfluxDB as database and visualization tool, allowing greater flexibility in the aggregation and custom made dashboards.
+MQTT is used in order to use Grafana & InfluxDB as database and visualization tool, allowing greater flexibility in the aggregation and custom made dashboards.
 
 The following topics are defined (*my_hostname* is the ESP chipID (aka serial number) of the ESP8266):
 
@@ -87,13 +74,8 @@ The device is reporting pulses (aka. water volume consumption in liter) on the t
 
 ## Compilation ##
 
-Before compiling, create a `private.h` file based on the provided `private_example.h` file: it should contain your Wifi settings, as well as the Domoticz parameters.  The `domoticz_counter_idx` parameter refers to the ID of the "incremental counter" created in Domoticz.
+In order to compile this sketch, you need a specific version of the PubSubClient: please download it on GitHub: https://github.com/xluthi/pubsubclient.
 
-You could choose if you want Domoticz and/or MQTT backend activated. To do so, (un)define the relevant constants at the beginning of the `pulse_counter_ESP8266.ino` file:
-
-```
-#define DOMOTICZ
-#define MQTT
-```
+Before compiling, create a `private.h` file based on the provided `private_example.h` file: it should contain your Wifi settings, as well as the MQTT broker parameters.
 
 The code contains a lot of debug statements. If those are not required, comment the `#define DEBUG` at the beginning of the main file.

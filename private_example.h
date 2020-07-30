@@ -15,18 +15,15 @@
 #ifndef _PRIVATE_H_
 #define _PRIVATE_H_
 
+// WiFi configuration
 const char* wifi_ssid     = "SSID";
 const char* wifi_password = "PaSsWoRd";
 const char* wifi_hostname = "ESP8266_xyz";
 
-// Domoticz configuration
-const char* domoticz_hostname    = "192.168.2.10";
-const int   domoticz_port        = 6060;
-const int   domoticz_counter_idx = 3;
-
 // MQTT broker configuration
-#define MQTT_PORT 1883
-IPAddress mqtt_server_ip(192, 168, 2, 10);
+#define MQTT_SERVER_IP "192.168.1.7"
+#define MQTT_SERVER_PORT 1883
+
 // The MQTT topic where to send the sensor value
 const char* mqtt_sensor_topic = "/house/sensors/water/city";
 
