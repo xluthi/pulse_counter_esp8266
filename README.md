@@ -1,6 +1,6 @@
 # Pulse counter with ESP8266 #
 
-This simple sketch detects magnetic pulse thanks to a reed switch, and sends it immediately to a [Domoticz](http://domoticz.com/) instance and/or an MQTT broker (it's configurable).
+This simple sketch detects magnetic pulse thanks to a reed switch, and sends it immediately to an MQTT broker.
 
 It is used with a Kent V100 (PSM) water meter, which is heavily used in Belgium.  It generates one pulse per 0.5 liter.
 
