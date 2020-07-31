@@ -23,19 +23,29 @@
 
 MqttBackend::MqttBackend(WiFiClient& wifiClient) : PubSubClient(wifiClient) {
 	this->_wifiClient = &wifiClient;
+	this->_config = NULL;
 };
 
-void MqttBackend::setup(const char* serverIP, int port, const char* myId) {
+void MqttBackend::setup(const char* serverIP, int port, String myId) {
 	this->_serverIPAddress.fromString(serverIP);
 	this->_serverPort = port;
 	setServer(_serverIPAddress, _serverPort);
 	this->_id = myId;
-	this->_rootTopic = String(MQTT_ROOT) + "/" + _id;
+	setRootTopic();
 
 	reconnect();
 	sendLog("I'm born. Hello World!");
 	sendBootNotification();
 }
+
+void MqttBackend::setRootTopic() {
+	this->_rootTopic = String(MQTT_ROOT) + "/" + _id;
+}
+
+void MqttBackend::setFlashConfig(FlashConfig& config) {
+	_config = &config;
+}
+
 
 bool MqttBackend::reconnect() {
   // Loop until we're reconnected
@@ -54,6 +64,11 @@ bool MqttBackend::reconnect() {
     this->subscribe(MQTT_INVENTORY_TOPIC);
   }
 	return true;
+}
+
+bool MqttBackend::forceReconnect() {
+	disconnect();
+	return reconnect();
 }
 
 bool MqttBackend::sendMessage(const char *topic, const char *payload) {
@@ -150,9 +165,38 @@ void MqttBackend::onCallback(char* topic, byte* payload, unsigned int length) {
   // return some configuration and state information's
   else if (s_topic == "get_config") {
     char msg[100];
-    sprintf(msg, "I'm sending info to '%s' topic.", MQTT_SENSOR_ROOT);
+    sprintf(msg, "I'm sending info to '%s' topic.", _rootTopic.c_str());
     sendLog(msg);
     sprintf(msg, "File %s compiled on %s %s.", __FILE__, __DATE__, __TIME__);
     sendLog(msg);
   }
+
+	// update hostname of the ESP
+	else if (s_topic == "set_hostname") {
+		char hostname[length+1];
+		strncpy(hostname, (char*) payload, length);
+		hostname[length] = 0;
+		Serial.print("set_hostname received with new hostname :");
+		Serial.println(hostname);
+		this->_id = String(hostname);
+		setRootTopic();
+		//disconnect and reconnect to update Hostname
+		Serial.println("I will now disconnect and reconnect with my new hostname");
+		forceReconnect();
+		if (_config) _config->setHostname(_id);
+	}
+
+	else if (s_topic == "reset_hostname") {
+		char hostname[12];
+		sprintf(hostname, "ESP-%06X", ESP.getChipId());
+		this->_id = String(hostname);
+		setRootTopic();
+		forceReconnect();
+		if (_config) _config->setHostname(_id);
+	}
+
+	else if (s_topic == "dump_flash") {
+		if(!_config) return;
+		sendLog(_config->dumpConfig().c_str());
+	}
 }

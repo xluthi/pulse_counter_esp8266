@@ -14,6 +14,7 @@
 #include <ESP8266WiFi.h>
 #include "private.h"
 #include "MqttBackendWater.h"
+#include "FlashConfig.h"
 
 #define DEBUG
 #include "xl_debug.h"
@@ -41,6 +42,7 @@ volatile unsigned long lastDebounce = 0;
 
 WiFiClient espClient;
 MqttBackendWater mqttClient(espClient);
+FlashConfig flashConfig;
 
 void setup() {
 #ifdef DEBUG
@@ -53,8 +55,11 @@ void setup() {
   pinMode(reedLedPin, OUTPUT);
   pinMode(reedPin,   INPUT);
 
-  connectWifi(wifi_ssid, wifi_password, wifi_hostname);
-  mqttClient.setup(MQTT_SERVER_IP, MQTT_SERVER_PORT);
+  flashConfig.setup();
+
+  connectWifi(wifi_ssid, wifi_password, flashConfig.getHostname().c_str());
+  mqttClient.setup(MQTT_SERVER_IP, MQTT_SERVER_PORT, flashConfig.getHostname());
+  mqttClient.setFlashConfig(flashConfig);
 
   // configure "master" timer to 1 second.
   noInterrupts();

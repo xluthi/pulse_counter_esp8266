@@ -24,6 +24,7 @@
 #include <ESP8266WiFi.h>
 #include "PubSubClient.h"
 #include <ESP8266httpUpdate.h>
+#include "FlashConfig.h"
 
 
 // Specific topic that all hardware on the network must listen to and answer.
@@ -37,10 +38,12 @@ class MqttBackend : public PubSubClient {
 	public:
 		MqttBackend(WiFiClient& wifiClient);
 		// to be called within Arduino setup() global function
-    void setup(const char *serverIP = "192.168.1.1", int port = 1883, const char *myId = "ESP-SENSOR");
+    void setup(const char *serverIP = "192.168.1.1", int port = 1883, String myId = "ESP-SENSOR");
 		bool reconnect();
+		bool forceReconnect(); // explicitly disconnect first
 		// send message to a specific mqtt log topic
 		bool sendLog(const char *message);
+		void setFlashConfig(FlashConfig& config);
 
 	private:
 		IPAddress _serverIPAddress;
@@ -48,11 +51,12 @@ class MqttBackend : public PubSubClient {
 		int _serverPort;
 		String _id;
 		String _rootTopic;
+		FlashConfig* _config;
 		bool _doSendLogs = true; // set to false to avoid sending log message via MQTT (/log topic)
 
 		void callback(char* topic, byte* payload, unsigned int length);
-		bool connect();
 		bool sendBootNotification();
+		void setRootTopic();
 
 	protected:
 		virtual void onCallback(char* topic, byte* payload, unsigned int length);

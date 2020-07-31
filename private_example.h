@@ -18,7 +18,6 @@
 // WiFi configuration
 const char* wifi_ssid     = "SSID";
 const char* wifi_password = "PaSsWoRd";
-const char* wifi_hostname = "ESP8266_xyz";
 
 // MQTT broker configuration
 #define MQTT_SERVER_IP "192.168.1.7"
